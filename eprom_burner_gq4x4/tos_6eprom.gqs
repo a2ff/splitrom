@@ -1,0 +1,26 @@
+cls
+device AT27C256R
+load tos104fr-lo0.img
+message insert L0 EPROM
+blankcheck
+write
+load tos104fr-lo1.img
+message insert L1 EPROM
+blankcheck
+write
+load tos104fr-lo2.img
+message insert L2 EPROM
+blankcheck
+write
+load tos104fr-hi0.img
+message insert H0 EPROM
+blankcheck
+write
+load tos104fr-hi1.img
+message insert H1 EPROM
+blankcheck
+write
+load tos104fr-hi2.img
+message insert H2 EPROM
+blankcheck
+write
