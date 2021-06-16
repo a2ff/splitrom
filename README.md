@@ -144,14 +144,13 @@ According to a 1989 tech note covering TOS upgrade from 2 mask ROMs to 6 mask RO
 
 ### Early 520STf with French TOS 1.0 in 6 `RP23256 (c)Atari 1986`
 ```
-U2 = Hi-2 = C026329-002 RP23256 0174 6M3 A0
-U3 = Hi-1 = C026330-002 RP23256 0175 6M3 A1
-U4 = Hi-0 = C026331-002 RP23256 0176 6M3 A6
-U5 = Lo-2 = C026332-002 RP23256 0177 6M3 A5
-U6 = Lo-1 = C026333-002 RP23256 0178 6M3 A1
-U7 = Lo-0 = C026334-002 RP23256 0179 6M3 A3
+U2 = C026329-002 RP23256 0174 6M3 A0 = Hi-2
+U3 = C026330-002 RP23256 0175 6M3 A1 = Hi-1
+U4 = C026331-002 RP23256 0176 6M3 A6 = Hi-0
+U5 = C026332-002 RP23256 0177 6M3 A5 = Lo-2
+U6 = C026333-002 RP23256 0178 6M3 A1 = Lo-1
+U7 = C026334-002 RP23256 0179 6M3 A3 = Lo-0
 ```
-_Hi/Lo-0..2 is not serigraphied on this motherboard._
 
 ### Late 1987 520STf with French TOS 1.2 in 2 ROMs date code week 34 of 1987
 ```
@@ -162,13 +161,20 @@ U67 = LO-0 = C101634 / SHARP JAPAN / (C)1987 ATARI 8734 D
 U62 = LO-1 = empty
 U53 = LO-2 = empty
 ```
+_HI/LO-0..2 **is** serigraphied on this motherboard._
 
-### 1985 ST with French TOS 1.0 in 6 UVPROM
+### 1985 ST with French TOS 1.0 in 6 hand-labelled UVPROM
 ```
-TODO
+U2 = FRANCE 4/24 H2
+U3 = FRANCE 4/24 H1
+U4 = FRANCE 4/24 H0
+U5 = FRANCE 4/24 L2
+U6 = FRANCE 4/24 L1
+U7 = FRANCE 4/24 L0
 ```
 
-## Atari ST motherboards
+## Verified Atari ST motherboards
+Verified from owned machines or in person.
 
 ### 520ST (not STf) late 1985, ROMs in lower left quadrant, RAMs in lower right
 ``` C070243 rev. C
@@ -226,6 +232,15 @@ If you have a 2-ROM TOS then jumpers `CE`, `A16`, `A17` have a solder blob on `1
 
 `R71`, `R72`, `R73` are the 3 68ohm resistors that needed to be installed alongside the 16 `41256` DRAM and capacitors for the 512kB->1MB upgrade.
 This machine has a slot for the Blitter (socket not soldered).
+
+
+## Atari ST motherboards pictures from the Internet
+
+### 520STf 19xx, ROMs in xxx, RAMs in xxx
+``` C070xxx rev. x
+```
+Lorem Ipsum.
+
 
 ## References
 - owned Atari ST machines
