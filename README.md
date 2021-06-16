@@ -1,6 +1,6 @@
 # TOS (and other ROM) splitter
 
-# splitrom Python module and executable
+# `splitrom.py` Python module and executable
 `splitrom.py` requires Python 3.9 or higher.
 No dependencies beyond the Python standard library.
 
