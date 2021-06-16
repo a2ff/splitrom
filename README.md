@@ -1,10 +1,19 @@
-# TOS splitter
+# TOS (and other ROM) splitter
 
+# splitrom Python module and executable
 `splitrom.py` requires Python 3.9 or higher.
 No dependencies beyond the Python standard library.
 
 `splitrom.py` was created to facilitate upgrading Atari ST computers with TOS 1.04.
 It may or may not be useful for STe, TT, Falcon and non-Atari computers.
+
+The `splitrom.py` module is also its own executable, which by default will apply ATARI ST TOS 1.x parameters, e.g. 192kB ROM split into 3 chunks of 2 byte lanes.
+
+Parameters other than defaults will be neeeded for other geometris, e.g. 1 chunk of 4 byte lanes (case of Atari TT) or 1 chunk of 2 byte lanes (case of Atari STe):
+- by passing optional parameters to `splitrom.py` (see help in `./import.py`);
+- by passing optional parameters to `splitrom.splitFile()` and other functions (see help in `import splitrom; help(splitrom)`) from your own programs.
+
+There is no support yet for lanes wider than 1 byte (case of 16-bit Amiga, which used 1 16-bit ROM, and 32-bit Amiga, which used 1 chunk of 2 lanes of 16-bit ROM).
 
 ## TOS 1.04 upgrade
 Very early ST computers with 2 small ROMs can only boot a TOS disk, not be upgraded to ROM TOS.
@@ -71,6 +80,8 @@ L0	0C15	DBAD
 
 `identify.py` will compute the checksum and CRC of ROM chip dumps, identify whether they are of a version known to `splitrom.py` and generate a source code fragment for inclusion into `splitrom.py`.
 
+`identify.py` mimics the reverse order in which Atari ST Diagnostics Cartridges list TOS checksums. Other than that, `identify.py` is generic.
+
 Assume you pulled ROM chips from sockets U2..U7 from a motherboard where U2..U7 happens to be the expected order Hi-2, Hi-1, Hi-0, Lo-2, Lo-1, Lo-0, then shell globbing will pass the files in the right order:
 ```
  $ ./identify.py fr 1.00 u?.bin
@@ -82,7 +93,7 @@ u5	6C4C	9372	lo2 1.00fr	lo2 1.00fr
 u6	9AF3	8C69	lo1 1.00fr	lo1 1.00fr
 u7	00D4	FD8E	lo0 1.00fr	lo0 1.00fr
 
-if ROMs unidentified, add this to splitrom.py:
+if ROMs unidentified, add this to splitrom/known.py:
     'fr': {
         '1.00': {
             'checksum': { 'hi2': 0xEB83, 'hi1': 0xDF2B, 'hi0': 0xF0B9,
@@ -91,6 +102,8 @@ if ROMs unidentified, add this to splitrom.py:
                           'lo2': 0x9372, 'lo1': 0x8C69, 'lo0': 0xFD8E } },
 ```
 Otherwise explicitly list your 6 ROM dumps in the expected order.
+
+The above example initially responded nothing under `chksum? crc?`, then the JSON fragment was added to `known.py`, then the example was rerun and correctly identified that TOS dump.
 
 
 ## Other uses
@@ -110,12 +123,12 @@ The first argument is the output file.
 ```
 The diagnostics cartridge magic number is 0xFA52235F.
 
-`mergerom_simplistic.py` will byte-interleave each pair of files and then concatenate the pairs.
-This is hardcoded for dumps of byte-wide ROMs forming several banks of a 16-bit bus, such as ST TOS.
+`mergetos_simplistic.py` will byte-interleave each pair of files and then concatenate the pairs.
+This is hardcoded for dumps of byte-wide ROMs forming several banks of a 16-bit bus, such as ST TOS and typical ST cartridges using 8-bit, but will support any even number of files (e.g. 6 for TOS, 2 or 4 for a ST cartridge, ...).
 Files shall be ordered in ascending addresses, which implies most-significant byte first.
 The first argument is the output file.
 ```
- $ ./mergerom_simplistic.py out u{4,7,3,6,2,5}.bin ; md5sum out tos100fr.img
+ $ ./mergetos_simplistic.py out u{4,7,3,6,2,5}.bin ; md5sum out tos100fr.img
 25789a649faff0a1176dc7d9b98105c0  out
 25789a649faff0a1176dc7d9b98105c0  tos100fr.img
 ```

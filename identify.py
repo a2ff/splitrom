@@ -5,6 +5,6 @@ def _usage():
 
 try:
     splitrom.checkFiles(sys.argv[3:])
-    print("\nif ROMs unidentified, add this to splitrom.py:")
+    print("\nif ROMs unidentified, add this to splitrom/known.py:")
     splitrom.prettySplits(sys.argv[1], sys.argv[2], sys.argv[3:])
 except Exception as e: print(e); _usage()
