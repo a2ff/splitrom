@@ -9,22 +9,21 @@ def _usage():
     sys.exit(1)
 
 from known import knownRom
-# knownRom[lang][version][alg][chip] = value
-# whichRom[alg][chip][value] = (lang, version)
-# whichRomChip[alg][value] = (lang, version, chip)
-# example: whichRom['checksum']['hi2'][0x0DC8] = ('french', '1.04')
-#          whichRomChip['checksum'][0x0DC8] = ('french', '1.04', 'hi2')
+# knownRom[version][alg][chip] = value
+# whichRom[alg][chip][value] = version
+# whichRomChip[alg][value] = (version, chip)
+# example: whichRom['checksum']['hi2'][0x0DC8] = '1.04fr'
+#          whichRomChip['checksum'][0x0DC8] = ('1.04fr', 'hi2')
 whichRom = {}; whichRomChip = {}
 def _initWhichRom():
-    for l, v_ in knownRom.items():
-        for v, a_ in v_.items():
-            for a, c_ in a_.items():
-                if a not in whichRom: whichRom[a] = {}
-                if a not in whichRomChip: whichRomChip[a] = {}
-                for c, s in c_.items():
-                    if c not in whichRom[a]: whichRom[a][c] = {}
-                    whichRom[a][c][s] = (l, v)
-                    whichRomChip[a][s] = (l, v, c)
+    for v, a_ in knownRom.items():
+        for a, c_ in a_.items():
+            if a not in whichRom: whichRom[a] = {}
+            if a not in whichRomChip: whichRomChip[a] = {}
+            for c, s in c_.items():
+                if c not in whichRom[a]: whichRom[a][c] = {}
+                whichRom[a][c][s] = v
+                whichRomChip[a][s] = (v, c)
 _initWhichRom()
 #import pprint
 #pprint.pp(whichRom); pprint.pp(whichRomChip)
@@ -102,12 +101,12 @@ def checkFiles(files):
         rom = open(i, 'rb').read(); s = chksum(rom); c = crc(rom)
         print(F"{i}\t{s:04X}\t{c:04X}\t", end='')
         try:
-            l, v, r = whichRomChip['checksum'][s]
-            print(F"{r} {v}{l}", end='\t')
+            v, r = whichRomChip['checksum'][s]
+            print(F"{r} {v}", end='\t')
         except: print(end='\t')
         try:
-            l, v, r = whichRomChip['crc'][c]
-            print(F"{r} {v}{l}")
+            v, r = whichRomChip['crc'][c]
+            print(F"{r if c!=0 else 'is'} {v if c!=0 else 'valid'}")
         except: print()
 
 def checkFile(*files):
@@ -124,7 +123,7 @@ def checkSplit(file, chunk = 65536, count = 3, lanes = ('hi', 'lo')):
     checkFiles([F"{base}-{j}{i}{ext}" for j in lanes
                                         for i in reversed(range(count))])
 
-def prettySplits(lang, ver, files, count = 3, lanes = ('hi', 'lo')):
+def prettySplits(ver, files, count = 3, lanes = ('hi', 'lo')):
     """Pretty-print the checksums of a list of split ROM files,
     for inclusion in splitrom.py.
     
@@ -136,21 +135,36 @@ def prettySplits(lang, ver, files, count = 3, lanes = ('hi', 'lo')):
     idx = [F"{j}{i}" for j in lanes for i in reversed(range(count))]
     idx = dict(zip(idx, range(len(idx))))
     algs = ['checksum', 'crc']
-    print(F"    {repr(lang)}: {{\n"
-          F"        {repr(ver)}: {{")
+    print(F"    {repr(ver)}: {{")
     for a in range(len(algs)):
         for i in range(len(lanes)):
             sa = F"'{algs[a]}':"
-            if i==0: print(F"            {sa:11} {{", end='')
-            else:    print(F"                         ", end='')
+            if i==0: print(F"        {sa:11} {{", end='')
+            else:    print(F"                     ", end='')
             for j in reversed(range(count)):
                 k = idx[F"{lanes[i]}{j}"]
-                print(F" '{lanes[i]}{j}': 0x{sums[a][k]:04X}", end='')
+                print(F" '{lanes[i]}{j if count>1 else ''}':"
+                      F" 0x{sums[a][k]:04X}", end='')
                 if j>0 or i<len(lanes)-1: print(",", end='')
             if i<len(lanes)-1: print()
             else:              print(" }", end='')
         if a<len(algs)-1: print(",")
         else:             print(" },")
+
+def tosVersion(file):
+    """Display TOS version and date.
+    """
+    rom = open(file, 'rb').read(32)
+    try:
+        lang = ("US", "German", "French", "UK", "Spanish", "Italian",
+                "Swedish", "Swiss French", "Swiss German", "Turkish",
+                "Finnish", "Norwegian", "Danish", "Saudi", "Dutch")[rom[29]>>1]
+    except:
+        lang = "multi-lingual"
+    print("If this is a TOS rom, then it is"
+          F" v{rom[2]:x}.{rom[3]:02x}"
+          F" {rom[26]:02x}{rom[27]:02x}-{rom[24]:02x}-{rom[25]:02x}"
+          F" {'PAL' if rom[29]&0x01 else 'NTSC'} {lang}")
 
 if __name__=='__main__':
     try:
@@ -158,7 +172,8 @@ if __name__=='__main__':
         if len(args)>3: args[3] = args[3:]; del args[4:]
         if len(args)>2: args[2] = int(args[2])
         if len(args)>1: args[1] = int(args[1])
+        tosVersion(args[0])
         splitFile(*args)
         checkSplit(*args)
     except IndexError: _usage()
-    #except Exception as e: print(e); _usage()
+    except Exception as e: print(e); _usage()

@@ -47,7 +47,7 @@ Refer to the known motherboards section for which chip goes into what socket.
 
 
 ## Atari Diagnostics Cartridge
-ST version 4.4 of the diag cart has a bug: the CRCs are shown in ascending order instead of descending, i.e. **the CRCs of H2 and H0 are swapped, and so are those of L2 and L0.**
+The Atari Diagnostics Cartridge version 4.4 ST has a bug: the CRCs are shown in ascending order instead of descending, i.e. **the CRCs of H2 and H0 are swapped, and so are those of L2 and L0.**
 
 Example outputs:
 ```
@@ -78,33 +78,52 @@ L1	1BD3	35DF
 L0	0C15	DBAD
 ```
 
-`identify.py` will compute the checksum and CRC of ROM chip dumps, identify whether they are of a version known to `splitrom.py` and generate a source code fragment for inclusion into `splitrom.py`.
+`identify.py` will compute the checksum and CRC of ROM chip dumps, identify whether they are of a version known to `splitrom.py` and generate a source code fragment for inclusion into `splitrom.py`, for any number of pairs of 8-bit dumps.
 
 `identify.py` mimics the reverse order in which Atari ST Diagnostics Cartridges list TOS checksums. Other than that, `identify.py` is generic.
 
 Assume you pulled ROM chips from sockets U2..U7 from a motherboard where U2..U7 happens to be the expected order Hi-2, Hi-1, Hi-0, Lo-2, Lo-1, Lo-0, then shell globbing will pass the files in the right order:
 ```
- $ ./identify.py fr 1.00 u?.bin
+ $ ./identify.py 1.00fr u?.bin
 	chksum	crc	chksum?		crc?
-u2	EB83	293D	hi2 1.00fr	hi2 1.00fr
-u3	DF2B	31EE	hi1 1.00fr	hi1 1.00fr
-u4	F0B9	B603	hi0 1.00fr	hi0 1.00fr
-u5	6C4C	9372	lo2 1.00fr	lo2 1.00fr
-u6	9AF3	8C69	lo1 1.00fr	lo1 1.00fr
-u7	00D4	FD8E	lo0 1.00fr	lo0 1.00fr
+u2.bin	EB83	293D	hi2 1.00fr	hi2 1.00fr
+u3.bin	DF2B	31EE	hi1 1.00fr	hi1 1.00fr
+u4.bin	F0B9	B603	hi0 1.00fr	hi0 1.00fr
+u5.bin	6C4C	9372	lo2 1.00fr	lo2 1.00fr
+u6.bin	9AF3	8C69	lo1 1.00fr	lo1 1.00fr
+u7.bin	00D4	FD8E	lo0 1.00fr	lo0 1.00fr
 
 if ROMs unidentified, add this to splitrom/known.py:
-    'fr': {
-        '1.00': {
-            'checksum': { 'hi2': 0xEB83, 'hi1': 0xDF2B, 'hi0': 0xF0B9,
-                          'lo2': 0x6C4C, 'lo1': 0x9AF3, 'lo0': 0x00D4 },
-            'crc':      { 'hi2': 0x293D, 'hi1': 0x31EE, 'hi0': 0xB603,
-                          'lo2': 0x9372, 'lo1': 0x8C69, 'lo0': 0xFD8E } },
+    '1.00fr': {
+        'checksum': { 'hi2': 0xEB83, 'hi1': 0xDF2B, 'hi0': 0xF0B9,
+                      'lo2': 0x6C4C, 'lo1': 0x9AF3, 'lo0': 0x00D4 },
+        'crc':      { 'hi2': 0x293D, 'hi1': 0x31EE, 'hi0': 0xB603,
+                      'lo2': 0x9372, 'lo1': 0x8C69, 'lo0': 0xFD8E } },
 ```
 Otherwise explicitly list your 6 ROM dumps in the expected order.
 
 The above example initially responded nothing under `chksum? crc?`, then the JSON fragment was added to `known.py`, then the example was rerun and correctly identified that TOS dump.
 
+`identify32.py` will do the same assuming 1 set of 4 ROM dumps with labelling consistent with the TT:
+```
+identify32.py 3.06uk 128/EEU601.BIN 128/OEU602.BIN 128/EOU603.BIN 128/OOU604.BIN
+		chksum	crc	chksum?		crc?
+128/EEU601.BIN	C0A1	0000	ee 3.06uk	is valid
+128/OEU602.BIN	B810	0000	oe 3.06uk	is valid
+128/EOU603.BIN	A89A	0000	eo 3.06uk	is valid
+128/OOU604.BIN	72BB	0000	oo 3.06uk	is valid
+
+if ROMs unidentified, add this to splitrom/known.py:
+    '3.06uk': {
+        'checksum': { 'ee': 0xC0A1,
+                      'oe': 0xB810,
+                      'eo': 0xA89A,
+                      'oo': 0x72BB },
+        'crc':      { 'ee': 0x0000,
+                      'oe': 0x0000,
+                      'eo': 0x0000,
+                      'oo': 0x0000 } },
+```
 
 ## Other uses
 Write your own tools using `import splitrom`.
@@ -133,50 +152,64 @@ The first argument is the output file.
 25789a649faff0a1176dc7d9b98105c0  tos100fr.img
 ```
 
+`catalog/*.sh` extract various fields from TOS images, good for building a catalog of TOS fingerprints.
+
 Remember those are as close to one-liners as it gets: no error checking, no parametrization.
 
 ## TOS revisions
-- 1985 = TOS 1.0
-- 1987 = TOS 1.02
-- 1989 = TOS 1.04
+Revisions recognizable by copyright years in the GEM Desktop About box,
+version number in ROM image at offset +2 (0xFC0002)
+and build date in ROM image at offset +24 (0xFC0018).
+
+### ST, Mega ST, STacy
+192kB TOS in 6 mask ROMs or 6 EPROMs (`27C256`).
+Later 520 ST, all 1040 ST and all Mega ST and STacy also support TOS in 2 mask ROMs (or 2 EPROM, requiring an adapter board as there are no pin-compatible 28-pin 1Mb EPROMs).
+
+- TOS 0.98 loaded from floppy disk by 16kB ROM
+- "Copyright (c) 1985" = TOS 1.0 1985-11-20 (US, UK), 1986-02-06 (German), 1986-04-24 (French)
+- "Copyright (c) 1986, 1987" = TOS 1.02 1987-04-22 (US, UK, French, German), 1987-09-15 (Swedish, Swiss), 1988-05-11 (Spanish)
+- "Copyright © 1985,86,87,88" = TOS 1.04 early development build
+- "Copyright © 1985,86,87,88,89" = TOS 1.04 1989-04-06
+- EmuTOS 1.01 2020-12-06 uses version 1.04 for the ST image and 2.06 for the STe image.
 
 According to a 1989 tech note covering TOS upgrade from 2 mask ROMs to 6 mask ROMs on various motherboards, so most likely a TOS 1.04, it would seem Atari never changed the C026329..34 chip p/n for 6-chip TOS.
 
-### Early 520STf with French TOS 1.0 in 6 `RP23256 (c)Atari 1986`
-```
-U2 = C026329-002 RP23256 0174 6M3 A0 = Hi-2
-U3 = C026330-002 RP23256 0175 6M3 A1 = Hi-1
-U4 = C026331-002 RP23256 0176 6M3 A6 = Hi-0
-U5 = C026332-002 RP23256 0177 6M3 A5 = Lo-2
-U6 = C026333-002 RP23256 0178 6M3 A1 = Lo-1
-U7 = C026334-002 RP23256 0179 6M3 A3 = Lo-0
-```
+### STe, Mega STe
+256kB TOS in 2 mask ROMs or 2 EPROMs (`27C010`).
 
-### Late 1987 520STf with French TOS 1.2 in 2 ROMs date code week 34 of 1987
-```
-U63 = HI-0 = C101633 / SHARP JAPAN / (C)1987 ATARI 8734 D
-U59 = HI-1 = empty
-U48 = HI-2 = empty
-U67 = LO-0 = C101634 / SHARP JAPAN / (C)1987 ATARI 8734 D
-U62 = LO-1 = empty
-U53 = LO-2 = empty
-```
-_HI/LO-0..2 **is** serigraphied on this motherboard._
+- "Copyright © 1985,86,87,88,89" = TOS 1.06 1989-07-29 (1.04 + STe support)
+- "Copyright © 1985,86,87,88,89" = TOS 1.62 1990-01-01
+- "Copyright © 1985,86,87,88,89,90" = TOS 2.05 1990-12-05
+- "Copyright © 1985,86,87,88,89,90,91" = TOS 2.06 1991-11-14 US, UK, French, German, Swedish, Swiss (also in ST Book)
+- "Copyright © 1985,86,87,88,89,90" = TOS 2.06 1991-11-14 Spanish
 
-### 1985 ST with French TOS 1.0 in 6 hand-labelled UVPROM
-```
-U2 = FRANCE 4/24 H2
-U3 = FRANCE 4/24 H1
-U4 = FRANCE 4/24 H0
-U5 = FRANCE 4/24 L2
-U6 = FRANCE 4/24 L1
-U7 = FRANCE 4/24 L0
-```
+### TT
+512kB TOS in 4 mask ROMs or 4 EPROMs (`27C010`).
+
+- "Copyright © 1985,86,87,88,89" = TOS 3.00 1990-06-16 (development "TTOS blue")
+- "Copyright © 1985,86,87,88,89,90" = TOS 3.01 1990-08-29
+- "Copyright © 1985,86,87,88,89,90" = TOS 3.05 1990-12-05 (2.05 + TT support)
+- "1985,86,87,88,89,90,91" = TOS 3.06 1991-09-24 US, UK, French, German, Swedish
+- "1985,86,87,88,89,90" = TOS 3.06 1991-09-24 Spanish
+
+### ST Book
+- "Copyright © 1985,86,87,88,89,90,91,92" = TOS 3.08 1992-03-10 (US), 1993-01-21 (French) (3.06 + ST Book support)
+
+### Falcon
+512kB TOS in 1 mask ROMs or 1 EPROMs (`27C4096`).
+
+- "Copyright © 1985-1993" = TOS 4.00 1992-08-11
+- "Copyright © 1985-1993" = TOS 4.01 1992-10-02
+- "Copyright © 1985-1993" = TOS 4.02 1993-01-26
+- "Copyright © 1985-1993" = TOS 4.04 1993-03-08
 
 ## Verified Atari ST motherboards
 Verified from owned machines or in person.
 
 ### 520ST (not STf) late 1985, ROMs in lower left quadrant, RAMs in lower right
+520 ST upgraded to 1MB very much like 520 ST+ so quite possibly factory-made;
+handwritten labels could well be from the Atari factory as well.
+UVPROM part numbers have not been inspected, to preserve the labels.
 ``` C070243 rev. C
       ...--------...
 .           U8
@@ -189,10 +222,17 @@ Verified from owned machines or in person.
 | Hi-0 U7        ...RAMs... |
 +---------------------------+
 ```
-520ST, ST+, 260ST, should have 6 EPROM.
-Early machines have only 2 EPROM with a boot ROM for loading TOS from disk.
+French TOS 1.0 in 6 hand-labelled UVPROM:
+```
+U2 = FRANCE 4/24 H2
+U3 = FRANCE 4/24 H1
+U4 = FRANCE 4/24 H0
+U5 = FRANCE 4/24 L2
+U6 = FRANCE 4/24 L1
+U7 = FRANCE 4/24 L0
+```
 
-**Install the 6 EPROM.**
+**Install 6 `27C256` 200ns or faster** (32kB UVPROM, or `27C256R` OTPROM, or `28C256` EEPROM).
 
 Conversion to 2-ROM TOS is described in Atari tech notes but requires piggy-backing the `74LS11N` on `U8`.
 
@@ -208,9 +248,17 @@ Conversion to 2-ROM TOS is described in Atari tech notes but requires piggy-back
 |     ...RAMs...         |
 +------------------------+
 ```
+French TOS 1.0 in 6 `RP23256 (c)Atari 1986`:
+```
+U2 = C026329-002 RP23256 0174 6M3 A0 = Hi-2
+U3 = C026330-002 RP23256 0175 6M3 A1 = Hi-1
+U4 = C026331-002 RP23256 0176 6M3 A6 = Hi-0
+U5 = C026332-002 RP23256 0177 6M3 A5 = Lo-2
+U6 = C026333-002 RP23256 0178 6M3 A1 = Lo-1
+U7 = C026334-002 RP23256 0179 6M3 A3 = Lo-0
+```
 
-**Install the 6 EPROM.**
-
+**Install 6 `27C256` 200ns or faster.**
 
 ### 520STf late 1987, ROMs in lower left quadrant, RAMs under PSU
 ``` C070789-001 rev. C 1987
@@ -226,9 +274,20 @@ Conversion to 2-ROM TOS is described in Atari tech notes but requires piggy-back
 | Hi-0 U63  A17   U64 68000       (Blitter) |
 +-------------------------------------------+
 ```
+French TOS 1.2 in 2 ROMs date code week 34 of 1987:
+```
+U63 = HI-0 = C101633 / SHARP JAPAN / (C)1987 ATARI 8734 D
+U59 = HI-1 = empty
+U48 = HI-2 = empty
+U67 = LO-0 = C101634 / SHARP JAPAN / (C)1987 ATARI 8734 D
+U62 = LO-1 = empty
+U53 = LO-2 = empty
+```
+_HI/LO-0..2 **is** serigraphied on this motherboard._
+
 If you have a 2-ROM TOS then jumpers `CE`, `A16`, `A17` have a solder blob on `1M` and the `74LS11N` is installed in `U68`.
 
-**Install the 6 EPROM and move the 3 solder blobs to `256K` (as in `27C256`, 256kb EPROM).**
+**Install 6 `27C256` and move the 3 solder blobs to `256K`.**
 
 `R71`, `R72`, `R73` are the 3 68ohm resistors that needed to be installed alongside the 16 `41256` DRAM and capacitors for the 512kB->1MB upgrade.
 This machine has a slot for the Blitter (socket not soldered).
@@ -236,16 +295,78 @@ This machine has a slot for the Blitter (socket not soldered).
 
 ## Atari ST motherboards pictures from the Internet
 
+### 260ST, earliest 520ST
+260ST has a 16kB ROM in 2 64kb chips labelled `C026036` and `C026037`, that loads TOS from floppy.
+
+28-pin `2764` EPROM are pin-compatible with the ROM sockets of 6-chip machines; most likely development 260ST had `2764` EPROMs.
+
 ### 520STf 19xx, ROMs in xxx, RAMs in xxx
 ``` C070xxx rev. x
 ```
-Lorem Ipsum.
+*TODO*
+
+### STacy
+The STacy has TOS 1.04 on a daughterboard with 2 ROM sockets for 1Mb ROMs.
+```
+U3 = HI C301123-001 French
+U4 = LO C301124-001 French
+``` 
+**Install 2 `27C010` 200ns or faster.**
+
+### 1040STe
+The 1040STe supports 256kb, 512kb and 1Mb ROMs, the later in `27C010` and `27C1000` pinouts thanks to jumpers — only 1Mb EPROM are large enough for the Mega STe TOS.
+```
+U102 = hi
+U103 = lo
+```
+**Install 2 `27C010` 200ns or faster** (128kB UVPROM, or `29F010` or `39F010` Flash EPROM).
+
+### Mega STe
+The Mega STe has jumpers like the 1040STe.
+```
+U206 = hi
+U207 = lo
+```
+**Install 2 `27C010` 150ns or faster.**
+
+### Falcon
+The Falcon has a 16-bit bus and uses one 16-bit ROM in PLCC44 format.
+
+**Install 1 `27C4096` 150ns or faster in socket `U51`** (512kB UVPROM, or `27PC240`).
+
+### TT
+The TT has a 32-bit bus and uses 4 8-bit ROM.
+```
+U601 EE = TT030 TOS UK C301929-002B EE $AB4D
+U602 OE = TT030 TOS UK C301930-002B OE $3E68
+U603 EO = TT030 TOS UK C301931-002B EO $C5CE
+U604 OO = TT030 TOS UK C301932-002B OO $35D7
+```
+```
+U601 EE = TTOS FRA C301933-003C EE $5B92
+U602 OE = TTOS FRA C301934-003C OE $807D
+U603 EO = TTOS FRA C301935-003C EO $3123
+U604 OO = TTOS FRA C301936-003C OO $DCB1
+```
+`U601` is `D31..24`, `U602` is `D23..16`, `U603` is `D15..8`, `U604` is `D7..0`
+=> `EE` is the even byte of the even (16-bit) word or the most significant byte of the (32-bit) long word, `OE` is the odd byte of the even word, `EO` is the even byte of the odd word and `OO` is the odd byte of the odd word or the least significant byte of the long word.
+
+=> `splitrom.py tos404fr.img 524288 1 ee oe eo oo`.
+
+**Install 4 `27C010` 120ns or faster.**
 
 
 ## References
 - owned Atari ST machines
+- [The LaST Upgrade](https://www.exxoshost.co.uk/atari/last/index.htm) by the most excellent Exxos
 - https://temlib.org/AtariForumWiki/index.php/Atari_ST_motherboard_revisions
 - https://www.exxoshost.co.uk/forum/viewforum.php?f=41
 - https://www.exxoshost.co.uk/forum/viewforum.php?f=53
+- http://www.avtandil.narod.ru/tose.html
+- http://www.zhell.co.uk/ttpage.html
+- http://www.atariancomputing.com/blog/ataritt030revisionguide
+- http://msx.fab.free.fr/mpc2/atari/atari16-32/atari16-.htm
+- https://www.yaronet.com/topics/187904-le-petit-tt-illustre
+- TOS ROM header metadata and country codes: DevPac 3 user manual and https://www.atari-forum.com/viewtopic.php?t=15038
 
 ../..
