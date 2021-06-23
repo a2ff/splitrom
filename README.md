@@ -5,7 +5,8 @@
 No dependencies beyond the Python standard library.
 
 `splitrom.py` was created to facilitate upgrading Atari ST computers with TOS 1.04.
-It may or may not be useful for STe, TT, Falcon and non-Atari computers.
+It can also be used for STe and TT (no need on Falcon, it has a single 16-bit EPROM).
+It may or may not be useful for non-Atari computers.
 
 The `splitrom.py` module is also its own executable, which by default will apply ATARI ST TOS 1.x parameters, e.g. 192kB ROM split into 3 chunks of 2 byte lanes.
 
@@ -13,12 +14,11 @@ Parameters other than defaults will be neeeded for other geometris, e.g. 1 chunk
 - by passing optional parameters to `splitrom.py` (see help in `./import.py`);
 - by passing optional parameters to `splitrom.splitFile()` and other functions (see help in `import splitrom; help(splitrom)`) from your own programs.
 
-There is no support yet for lanes wider than 1 byte (case of 16-bit Amiga, which used 1 16-bit ROM, and 32-bit Amiga, which used 1 chunk of 2 lanes of 16-bit ROM).
+There is no support for lanes wider than 1 byte (case of 32-bit Amiga, which used 1 chunk of 2 lanes of 16-bit ROM).
 
 ## TOS 1.04 upgrade
-Very early ST computers with 2 small ROMs can only boot a TOS disk, not be upgraded to ROM TOS.
 ST and STf with 6 mask ROM or UVPROM can be upgraded by inserting 6 newly programmed EPROM chips.
-STf with only 2 of the 6 ROM sockets populated can be upgraded to 6 EPROM by moving 3 solder blobs.
+STf with only 2 of the 6 ROM sockets populated can be upgraded to 6 EPROM by moving 3 solder blobs, or straps on the Mega ST.
 
 The 192kB ROM image needs to be split into 3 64kB chunks, which further need to be split into odd and even bytes.
 Your EPROMer software may know how to split DWord images and apply an offset,
@@ -42,7 +42,7 @@ tos104fr-lo0.img	5746	88A2	lo0 1.04fr	lo2 1.04fr
 192K	tos104fr.img
 ```
 
-You may now burn 6 27C128 UVPROM or OTPROM.
+You may now burn 6 `27C256` UVPROM or OTPROM.
 Refer to the known motherboards section for which chip goes into what socket.
 
 
@@ -237,7 +237,7 @@ U7 = FRANCE 4/24 L0
 Conversion to 2-ROM TOS is described in Atari tech notes but requires piggy-backing the `74LS11N` on `U8`.
 
 ### 520STf ROMs 2 rows under PSU
-``` C0707523-001 rev. D week 45 1986
+``` C070523-001 rev. D week 45 1986
 +--------------------...
 |
 ++   H2 U2  H1 U3  H0 U4         .
@@ -287,7 +287,7 @@ _HI/LO-0..2 **is** serigraphied on this motherboard._
 
 If you have a 2-ROM TOS then jumpers `CE`, `A16`, `A17` have a solder blob on `1M` and the `74LS11N` is installed in `U68`.
 
-**Install 6 `27C256` and move the 3 solder blobs to `256K`.**
+**If missing populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
 
 `R71`, `R72`, `R73` are the 3 68ohm resistors that needed to be installed alongside the 16 `41256` DRAM and capacitors for the 512kB->1MB upgrade.
 This machine has a slot for the Blitter (socket not soldered).
@@ -295,15 +295,74 @@ This machine has a slot for the Blitter (socket not soldered).
 
 ## Atari ST motherboards pictures from the Internet
 
-### 260ST, earliest 520ST
-260ST has a 16kB ROM in 2 64kb chips labelled `C026036` and `C026037`, that loads TOS from floppy.
+**CAUTION: some motherboard may have ROM sockets keyed the wrong way!
+The stencils should be oriented correctly.
+The safest course of action is to simply follow the orientation of the previously installed ROM chips.**
 
-28-pin `2764` EPROM are pin-compatible with the ROM sockets of 6-chip machines; most likely development 260ST had `2764` EPROMs.
+### 520ST motherboard `C070115`
+Same as `C070243` regarding TOS upgrade.
+ROM numbering and locations are the same except U2 is not staggered (more shielding was later added to the entire periphery of the PCB).
 
-### 520STf 19xx, ROMs in xxx, RAMs in xxx
-``` C070xxx rev. x
+This is the earliest motherboard. The 260ST and earliest 520ST had only 2 ROM chips `C026036` and `C026037` (apparently 16kB) with a bootloader for loading a TOS disk in RAM. They will accept a 192kB ROM TOS.
+
+**If missing populate the DIL28 sockets and 220nF capacitors `C1`..`C6`, install 6 `27C256`.**
+
+### 520STf motherboard `C070859`
+SMD custom chips instead of PLCC sockets, otherwise same ROM location, numbering and solder blobs as `C070789`.
+
+**If missing populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+
+### 520STfm motherboard `C103088 C103253`
+These motherboards have *both* `C103088` and `C103253`. They have PLCC custom chips and SMD RAMs.
+ROMs are in a single row under the PSU, the unused slots are missing sockets and capacitors.
+No high-resolution pictures, but the motherboard has stencils `HI0 ROM FC-H` etc, same as the Mega ST below, and solder blobs are right above the ROMs.
+
+**Populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+
+### 1040STf motherboard `C103175`
+This motherboard has SMD 4-bit DRAM and custom chips, ROM chips are same as `C070789` with all 3 solder blobs near ROM `Hi-0`.
+
+**Populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+
+### 1040STfm motherboard `C103225`
+The motherboard says "ATARI 1040ST", layout is the same as `C707523` but with solder blobs and ROMs numbered same as `C070789`:
 ```
-*TODO*
+U48 Hi-2 ROM FE-H
+U53 Lo-2 ROM FE-L
+U59 Hi-1 ROM FD-H
+U62 Lo-1 ROM FD-L
+U63 Hi-0 ROM FC-H
+U67 Lo-0 ROM FC-L
+```
+Solder blobs are at the upper right and lower left of the ROM chips.
+
+**Populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+
+### 520STfm motherboard `C103414`
+Essentially identical to `C103175`, the ROMs have both `Hi-0` etc. and `ROM FC-H` etc. stencils.
+
+**Populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+
+### Mega ST
+All motherboard revisions have the ROMs in the same location right below the 68000 and expansion slot, with "jumpers" in the lower left corner for selecting 6x 256kb or 2x 1Mb ROM chips instead of solder blobs - but actual jumper headers may not be installed, instead 0-ohm resistors may be soldered.
+
+The ROM sockets are numbered the same on all motherboards:
+```
+U3 HI-2 ROM FE-H
+U4 LO-2 ROM FE-L
+U6 HI-1 ROM FD-H
+U7 LO-1 ROM FD-L
+U9 HI-0 ROM FC-H
+U10 LO-0 ROM FC-L
+```
+Rev. B has the "ROM Fx-y" stencils, rev. 4.0 and 5.0 do not.
+
+Some 2-ROM motherboards do not have sockets installed in the 4 unused positions, but the decoupling capacitors appear to be installed (and the installed ROM chips are socketed).
+
+If you have a 2-ROM TOS then jumpers `W2` and `W3` will be bridged middle-3 and jumper `W4` will be unpopulated.
+
+**Populate the missing DIL28 sockets, install 6 `27C256` and move the 0-ohm resistors of jumpers `W2` and `W3` to 1-middle and install a strap or 0-ohm resistor in jumper `W4`.**
+
 
 ### STacy
 The STacy has TOS 1.04 on a daughterboard with 2 ROM sockets for 1Mb ROMs.
@@ -313,21 +372,29 @@ U4 = LO C301124-001 French
 ``` 
 **Install 2 `27C010` 200ns or faster.**
 
-### 1040STe
-The 1040STe supports 256kb, 512kb and 1Mb ROMs, the later in `27C010` and `27C1000` pinouts thanks to jumpers — only 1Mb EPROM are large enough for the Mega STe TOS.
+### 520STe
+The 520STe can have a socketed or soldered surface-mounted MC68000 but all motherboard revisions have the ROMs in the same location above the mouse port recess to the right edge.
+
+The ROM sockets are numbered the same on all motherboards and are very clearly labelled `HI` and `LO`:
 ```
-U102 = hi
-U103 = lo
+U102 HI
+U103 LO
 ```
 **Install 2 `27C010` 200ns or faster** (128kB UVPROM, or `29F010` or `39F010` Flash EPROM).
 
+The 520STe supports 256kb, 512kb and 1Mb ROMs, the later in `27C010` and `27C1000` pinouts thanks to jumpers — only 1Mb EPROM are large enough for the Mega STe TOS.
+
 ### Mega STe
-The Mega STe has jumpers like the 1040STe.
+All motherboard revisions have the ROMs in the same location in the lower right corner, below the SIMM slots.
+
+The ROM sockets are numbered the same on all motherboards:
 ```
 U206 = hi
 U207 = lo
 ```
 **Install 2 `27C010` 150ns or faster.**
+
+The Mega STe has jumpers like the 1040STe.
 
 ### Falcon
 The Falcon has a 16-bit bus and uses one 16-bit ROM in PLCC44 format.
@@ -336,6 +403,11 @@ The Falcon has a 16-bit bus and uses one 16-bit ROM in PLCC44 format.
 
 ### TT
 The TT has a 32-bit bus and uses 4 8-bit ROM.
+There are several motherboard revisions but only 2 layouts:
+early boards have the ROMs to the right,
+later boards have the ROMs to the lower left.
+
+The ROM sockets are numbered the same on all motherboards:
 ```
 U601 EE = TT030 TOS UK C301929-002B EE $AB4D
 U602 OE = TT030 TOS UK C301930-002B OE $3E68
