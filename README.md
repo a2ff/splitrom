@@ -125,6 +125,11 @@ if ROMs unidentified, add this to splitrom/known.py:
                       'oo': 0x0000 } },
 ```
 
+**Note:
+some chips have the same checksum or CRC across several different TOS images,
+notably different languages of a same TOS version, particularly US and UK.**
+The identified TOS can be any of the matches, `identify.py` will not try to output multiple matches.
+
 ## Other uses
 Write your own tools using `import splitrom`.
 See the module content with `help(splitrom)` at the Python interactive prompt.
@@ -161,14 +166,23 @@ Revisions recognizable by copyright years in the GEM Desktop About box,
 version number in ROM image at offset +2 (0xFC0002)
 and build date in ROM image at offset +24 (0xFC0018).
 
+The version number in the ROM header is in the form of 2 BCD digits, and there was always confusion how to interpret the 2nd byte:
+- 0x0162 is clearly TOS 1.62
+- 0x0100 is clearly TOS 1.0
+- 0x0102, is that TOS 1.2 or TOS 1.02 ??
+- 0x0106, is that TOS 1.6 or TOS 1.06 or TOS 1.60 ??
+- 0x0206, is that TOS 2.6 or TOS 2.06 ??
+
+Usage has settled on TOS 1.02, sometimes 1.2, TOS 1.60, rarely 1.06, almost never 1.6, TOS 2.06 and almost never 2.6 nor 2.60. 
+
 ### ST, Mega ST, STacy
 192kB TOS in 6 mask ROMs or 6 EPROMs (`27C256`).
 Later 520 ST, all 1040 ST and all Mega ST and STacy also support TOS in 2 mask ROMs (or 2 EPROM, requiring an adapter board as there are no pin-compatible 28-pin 1Mb EPROMs).
 
 - TOS 0.98 loaded from floppy disk by 16kB ROM
 - "Copyright (c) 1985" = TOS 1.0 1985-11-20 (US, UK), 1986-02-06 (German), 1986-04-24 (French)
-- "Copyright (c) 1986, 1987" = TOS 1.02 1987-04-22 (US, UK, French, German), 1987-09-15 (Swedish, Swiss), 1988-05-11 (Spanish)
-- "Copyright © 1985,86,87,88" = TOS 1.04 early development build
+- "Copyright (c) 1986, 1987" = TOS 1.02 a.k.a 1.2 1987-04-22 (US, UK, French, German), 1987-09-15 (Swedish, Swiss), 1988-05-11 (Spanish)
+- "Copyright © 1985,86,87,88" = TOS 1.04 a.k.a. 1.4 early development build
 - "Copyright © 1985,86,87,88,89" = TOS 1.04 1989-04-06
 - EmuTOS 1.01 2020-12-06 uses version 1.04 for the ST image and 2.06 for the STe image.
 
@@ -177,7 +191,7 @@ According to a 1989 tech note covering TOS upgrade from 2 mask ROMs to 6 mask RO
 ### STe, Mega STe
 256kB TOS in 2 mask ROMs or 2 EPROMs (`27C010`).
 
-- "Copyright © 1985,86,87,88,89" = TOS 1.06 1989-07-29 (1.04 + STe support)
+- "Copyright © 1985,86,87,88,89" = TOS 1.06 a.k.a. 1.60 1989-07-29 (1.04 + STe support)
 - "Copyright © 1985,86,87,88,89" = TOS 1.62 1990-01-01
 - "Copyright © 1985,86,87,88,89,90" = TOS 2.05 1990-12-05
 - "Copyright © 1985,86,87,88,89,90,91" = TOS 2.06 1991-11-14 US, UK, French, German, Swedish, Swiss (also in ST Book)
