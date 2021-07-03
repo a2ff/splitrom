@@ -373,10 +373,13 @@ Rev. B has the "ROM Fx-y" stencils, rev. 4.0 and 5.0 do not.
 
 Some 2-ROM motherboards do not have sockets installed in the 4 unused positions, but the decoupling capacitors appear to be installed (and the installed ROM chips are socketed).
 
-If you have a 2-ROM TOS then jumpers `W2` and `W3` will be bridged middle-3 and jumper `W4` will be unpopulated.
+If you have a 2-ROM TOS then jumpers `W2` and `W3` will be bridged 2-3 and jumper `W4` will be unpopulated and a `74LS11` will be installed in `U12`.
+*This is the same circuit as later 520STf except there is no way to disconnect the output of the `74LS11`.*
 
-**Populate the missing DIL28 sockets, install 6 `27C256` and move the 0-ohm resistors of jumpers `W2` and `W3` to 1-middle and install a strap or 0-ohm resistor in jumper `W4`.**
+**Populate the missing DIL28 sockets, install 6 `27C256`, move the 0-ohm resistors of jumpers `W2` and `W3` to 1-2, install a strap or 0-ohm resistor in jumper `W4` and remove `U12` or cut pin 12 of `U12`.**
 
+*Some reported success with `U12` still installed -- this is dubious... unless their `74LS11` had died precisely due to a shorted output.
+Later Mega ST may have a resistor on the path from pin 12 of `U12` to `W4` and the ROM sockets, in which case it suffices to remove that resistor.*
 
 ### STacy
 The STacy has TOS 1.04 on a daughterboard with 2 ROM sockets for 1Mb ROMs.
