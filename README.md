@@ -10,11 +10,11 @@ It may or may not be useful for non-Atari computers.
 
 The `splitrom.py` module is also its own executable, which by default will apply ATARI ST TOS 1.x parameters, e.g. 192kB ROM split into 3 chunks of 2 byte lanes.
 
-Parameters other than defaults will be neeeded for other geometris, e.g. 1 chunk of 4 byte lanes (case of Atari TT) or 1 chunk of 2 byte lanes (case of Atari STe):
+Parameters other than defaults will be needed for other geometries, e.g. 1 chunk of 4 byte lanes (case of Atari TT) or 1 chunk of 2 byte lanes (case of Atari STe):
 - by passing optional parameters to `splitrom.py` (see help in `./import.py`);
 - by passing optional parameters to `splitrom.splitFile()` and other functions (see help in `import splitrom; help(splitrom)`) from your own programs.
 
-There is no support for lanes wider than 1 byte (case of 32-bit Amiga, which used 1 chunk of 2 lanes of 16-bit ROM).
+There is no support for lanes wider than 1 byte (case of 32-bit Amiga, which takes 1 chunk of 2 lanes of 16-bit ROM).
 
 ## TOS 1.04 upgrade
 ST and STf with 6 mask ROM or UVPROM can be upgraded by inserting 6 newly programmed EPROM chips.
@@ -218,7 +218,7 @@ According to a 1989 tech note covering TOS upgrade from 2 mask ROMs to 6 mask RO
 - "Copyright © 1985-1993" = TOS 4.04 1993-03-08
 
 ## Verified Atari ST motherboards
-Verified from owned machines or in person.
+_Verified from owned machines or in person._
 
 ### 520ST (not STf) late 1985, ROMs in lower left quadrant, RAMs in lower right
 520 ST upgraded to 1MB very much like 520 ST+ so quite possibly factory-made;
@@ -301,7 +301,7 @@ _HI/LO-0..2 **is** serigraphied on this motherboard._
 
 If you have a 2-ROM TOS then jumpers `CE`, `A16`, `A17` have a solder blob on `1M` and the `74LS11N` is installed in `U68`.
 
-**If missing populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+**If missing, populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
 
 `R71`, `R72`, `R73` are the 3 68ohm resistors that needed to be installed alongside the 16 `41256` DRAM and capacitors for the 512kB->1MB upgrade.
 This machine has a slot for the Blitter (socket not soldered).
@@ -319,12 +319,12 @@ ROM numbering and locations are the same except U2 is not staggered (more shield
 
 This is the earliest motherboard. The 260ST and earliest 520ST had only 2 ROM chips `C026036` and `C026037` (apparently 16kB) with a bootloader for loading a TOS disk in RAM. They will accept a 192kB ROM TOS.
 
-**If missing populate the DIL28 sockets and 220nF capacitors `C1`..`C6`, install 6 `27C256`.**
+**If missing, populate the DIL28 sockets and 220nF capacitors `C1`..`C6`, install 6 `27C256`.**
 
 ### 520STf motherboard `C070859`
 SMD custom chips instead of PLCC sockets, otherwise same ROM location, numbering and solder blobs as `C070789`.
 
-**If missing populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
+**If missing, populate the DIL28 sockets and 220nF capacitors, install 6 `27C256` and move the 3 solder blobs to `256K`.**
 
 ### 520STfm motherboard `C103088 C103253`
 These motherboards have *both* `C103088` and `C103253`. They have PLCC custom chips and SMD RAMs.
